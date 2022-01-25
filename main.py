@@ -1,4 +1,3 @@
-from asyncio import open_connection
 from binance import Client
 from decouple import config
 import telegram
@@ -151,10 +150,15 @@ def strategy():
 
                 time.sleep(2)
 
+
 while True:
-    for symbol in symbols:
-        pair = symbol + coin
-        client.futures_change_leverage(leverage=leverage, symbol=pair)
-        strategy()
+    try:
+        for symbol in symbols:
+            pair = symbol + coin
+            client.futures_change_leverage(leverage=leverage, symbol=pair)
+            strategy()
+    except:
+        time.sleep(5)
+        continue
 
     time.sleep(10)
