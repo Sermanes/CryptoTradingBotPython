@@ -124,10 +124,10 @@ def strategy():
     print('El activo ', pair, ' se encuentra en los siguientes niveles: RSI:', rsi, ' MACD: ', macd,
             ' Estocastico: K/D ', stoch_k, '/', stoch_d)
 
-    if (rsi <= 29.5) and (macd < 0) and (stoch_k <= 20) and (stoch_d <= 20):
+    while (rsi <= 29.5) and (macd < 0) and (stoch_k <= 20) and (stoch_d <= 20):
         minute_data = get_minute_data(pair, '1m', '100')
-        rsi, macd, stoch_k, stoch_d, price = return_strategy_data(minute_data)
-        if (rsi <= 30) and (macd < 0) and (stoch_k <= 20) and (stoch_d <= 20):
+        _rsi, _macd, _stoch_k, _stoch_d, price = return_strategy_data(minute_data)
+        if (_rsi <= 30) and (_macd < 0) and (_stoch_k <= 20) and (_stoch_d <= 20):
             order_is_open = True
             order_id, quantity = open_order(data)
             order = client.futures_get_order(orderId=order_id, symbol=pair)
@@ -149,6 +149,7 @@ def strategy():
                     continue
 
                 time.sleep(2)
+        time.sleep(1)
 
 
 while True:
