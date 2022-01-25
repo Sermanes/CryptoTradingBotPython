@@ -124,7 +124,7 @@ def strategy():
     print('El activo ', pair, ' se encuentra en los siguientes niveles: RSI:', rsi, ' MACD: ', macd,
             ' Estocastico: K/D ', stoch_k, '/', stoch_d)
 
-    if (rsi <= 27.5) and (macd < 0) and (stoch_k <= 20) and (stoch_d <= 20):
+    if (rsi <= 29.5) and (macd < 0) and (stoch_k <= 20) and (stoch_d <= 20):
         minute_data = get_minute_data(pair, '1m', '100')
         rsi, macd, stoch_k, stoch_d, price = return_strategy_data(minute_data)
         if (rsi <= 30) and (macd < 0) and (stoch_k <= 20) and (stoch_d <= 20):
