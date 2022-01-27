@@ -137,7 +137,7 @@ def strategy():
                 rsi, macd, stoch_k, stoch_d, current_price = return_strategy_data(minute_data)
                 print('El activo ', pair, ' en rango de 1m se encuentra en los siguientes niveles: RSI:', rsi,
                         ' MACD: ', macd, ' Estocastico: K/D ', stoch_k, '/', stoch_d)
-                if stoch_k >= 80 and stoch_d >= 80 and current_price > open_price:
+                if stoch_k >= 80 or stoch_d >= 80:
                     close_order(quantity)
                     register(False, current_price, quantity)
                     order_is_open = False
