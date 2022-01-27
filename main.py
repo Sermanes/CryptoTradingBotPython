@@ -119,12 +119,12 @@ def register(new_order, price, quantity):
 
 # strategy es el core de la aplicación, contiene la logica de la estrategia
 def strategy():
-    data = get_minute_data(pair, '5m', '500')
+    data = get_minute_data(pair, '1m', '100')
     rsi, macd, stoch_k, stoch_d, price = return_strategy_data(data)
     print('El activo ', pair, ' se encuentra en los siguientes niveles: RSI:', rsi, ' MACD: ', macd,
             ' Estocastico: K/D ', stoch_k, '/', stoch_d)
 
-    while (rsi <= 28) and (macd < 0) and (stoch_k <= 20) and (stoch_d <= 20):
+    while (rsi <= 25.5) and (macd < 0) and (stoch_k <= 20) and (stoch_d <= 20):
         minute_data = get_minute_data(pair, '1m', '100')
         _rsi, _macd, _stoch_k, _stoch_d, price = return_strategy_data(minute_data)
         if (_rsi <= 30) and (_macd < 0) and (_stoch_k <= 20) and (_stoch_d <= 20):
@@ -137,7 +137,7 @@ def strategy():
                 rsi, macd, stoch_k, stoch_d, current_price = return_strategy_data(minute_data)
                 print('El activo ', pair, ' en rango de 1m se encuentra en los siguientes niveles: RSI:', rsi,
                         ' MACD: ', macd, ' Estocastico: K/D ', stoch_k, '/', stoch_d)
-                if stoch_k >= 80 and stoch_d >= 80:
+                if stoch_k >= 80 and stoch_d >= 80 and current_price > open_price:
                     close_order(quantity)
                     register(False, current_price, quantity)
                     order_is_open = False
