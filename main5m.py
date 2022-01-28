@@ -1,3 +1,4 @@
+import traceback
 from binance import Client
 from decouple import config
 import telegram
@@ -13,7 +14,8 @@ symbols = ['BTC', 'ADA', 'BNB', 'ETH', 'XRP']
 coin = 'BUSD'
 pair = ''
 leverage = 2
-file = 'data.csv'
+data_file = 'data.csv'
+exception_file = 'exception.txt'
 client = Client(config('API_KEY'), config('API_SECRET'), testnet=False)
 
 
@@ -63,7 +65,7 @@ def apply_technicals(df):
 def open_order(df):
     balance = get_account_balance(0)
     last_price = df.Close[-1]
-    quantity = round(math.floor(((balance / last_price) * leverage)) * 0.75, 2)
+    quantity = round(((balance / last_price) * leverage) * 0.75, 3)
     print('El bot comprara una cantidad de: ', quantity, ' ', pair)
     order = client.futures_create_order(symbol=pair, side='BUY', type="MARKET", quantity=quantity)
     register(True, last_price, quantity)
@@ -90,8 +92,8 @@ def return_strategy_data(df):
 
 
 # write_file permite escribir en el archivo
-def write_file(data, n=True):
-    f = open(file, 'a')
+def write_file(filename, data, n=True):
+    f = open(filename, 'a')
 
     if n:
         f.write(data + '\n')
@@ -109,11 +111,11 @@ def send_telegram_message(message):
 def register(new_order, price, quantity):
     if new_order:
         text = 'Open: ' + pair + ': ' + str(price) + '/' + str(quantity) + ' temp: 5m '
-        write_file(text, False)
+        write_file(data_file, text, False)
         send_telegram_message(text)
     else:
         text = 'Close: ' + pair + ': ' + str(price) + '/' + str(quantity)
-        write_file(text, quantity)
+        write_file(data_file, text, quantity)
         send_telegram_message(text)
 
 
@@ -159,7 +161,8 @@ while True:
             client.futures_change_leverage(leverage=leverage, symbol=pair)
             strategy()
     except:
-        time.sleep(5)
+        write_file(exception_file, traceback.format_exc())
+        time.sleep(2)
         continue
 
     time.sleep(10)
