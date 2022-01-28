@@ -104,7 +104,7 @@ def write_file(filename, data, n=True):
 # send_telegram_message permite enviar el mensansaje a telegram directamente
 def send_telegram_message(message):
     bot = telegram.Bot(token=config("API_TOKEN_TELEGRAM"))
-    bot.send_message(chat_id='600833782', text=message)
+    bot.send_message(chat_id=config("TELEGRAM_USER_ID"), text=message)
 
 
 # register escribe sobre el archivo el resultado de la transacción
@@ -119,6 +119,28 @@ def register(new_order, price, quantity):
         send_telegram_message(text)
 
 
+# stop_loss_take_profit normas para ejecutar la opcion de venta
+def stop_loss_take_profit(quantity, open_price):
+    order_is_open = True
+    while order_is_open:
+        minute_data = get_minute_data(pair, '1m', '100')
+        rsi, macd, stoch_k, stoch_d, current_price = return_strategy_data(minute_data)
+        print('El activo ', pair, ' en rango de 1m se encuentra en los siguientes niveles: RSI:', rsi,
+                ' MACD: ', macd, ' Estocastico: K/D ', stoch_k, '/', stoch_d)
+        if (stoch_k >= 70 and open_price < current_price) or (stoch_d >= 65 and open_price < current_price) or (rsi > 50 and open_price < current_price):
+            close_order(quantity)
+            register(False, current_price, quantity)
+            order_is_open = False
+            continue
+        if current_price <= (open_price * 0.995) or current_price >= (open_price * 1.005):
+            close_order(quantity)
+            register(False, current_price, quantity)
+            order_is_open = False
+            continue
+
+        time.sleep(1)
+
+
 # strategy es el core de la aplicación, contiene la logica de la estrategia
 def strategy():
     data = get_minute_data(pair, '1m', '100')
@@ -127,29 +149,14 @@ def strategy():
             ' Estocastico: K/D ', stoch_k, '/', stoch_d)
 
     if (rsi <= 25.5) and (macd < 0) and (stoch_k <= 20) and (stoch_d <= 20):
-        order_is_open = True
         order_id, quantity = open_order(data)
         order = client.futures_get_order(orderId=order_id, symbol=pair)
         open_price = float(order['avgPrice'])
-        while order_is_open:
-            minute_data = get_minute_data(pair, '1m', '100')
-            rsi, macd, stoch_k, stoch_d, current_price = return_strategy_data(minute_data)
-            print('El activo ', pair, ' en rango de 1m se encuentra en los siguientes niveles: RSI:', rsi,
-                    ' MACD: ', macd, ' Estocastico: K/D ', stoch_k, '/', stoch_d)
-            if stoch_k >= 80 or stoch_d >= 80:
-                close_order(quantity)
-                register(False, current_price, quantity)
-                order_is_open = False
-                continue
-            if current_price <= (open_price * 0.995) or current_price >= (open_price * 1.005):
-                close_order(quantity)
-                register(False, current_price, quantity)
-                order_is_open = False
-                continue
-
-            time.sleep(2)
+        stop_loss_take_profit(quantity, open_price)
+            
 
 
+# Bucle encargado de realizar la estrategia
 while True:
     try:
         for symbol in symbols:

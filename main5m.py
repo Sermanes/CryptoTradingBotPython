@@ -104,7 +104,7 @@ def write_file(filename, data, n=True):
 # send_telegram_message permite enviar el mensansaje a telegram directamente
 def send_telegram_message(message):
     bot = telegram.Bot(token=config("API_TOKEN_TELEGRAM"))
-    bot.send_message(chat_id='600833782', text=message)
+    bot.send_message(chat_id=config("TELEGRAM_USER_ID"), text=message)
 
 
 # register escribe sobre el archivo el resultado de la transacción
