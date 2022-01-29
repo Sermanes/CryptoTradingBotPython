@@ -65,7 +65,7 @@ def apply_technicals(df):
 def open_order(df):
     balance = get_account_balance(0)
     last_price = df.Close[-1]
-    if pair.find('BTC') or pair.find('ETH'):
+    if pair.find('BTC') == 0 or pair.find('ETH') == 0:
         quantity = round(((balance / last_price) * leverage) * 0.75, 3)
     else:
         quantity = round(((balance / last_price) * leverage) * 0.75, 2)
