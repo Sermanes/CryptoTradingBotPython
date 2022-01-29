@@ -65,7 +65,7 @@ def apply_technicals(df):
 def open_order(df):
     balance = get_account_balance(0)
     last_price = df.Close[-1]
-    quantity = round(((balance / last_price) * leverage) * 0.75, 2)
+    quantity = round(((balance / last_price) * leverage) * 0.75, 3)
     print('El bot comprara una cantidad de: ', quantity, ' ', pair)
     order = client.futures_create_order(symbol=pair, side='BUY', type="MARKET", quantity=quantity)
     register(True, last_price, quantity)
