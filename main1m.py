@@ -33,7 +33,7 @@ def get_account_balance(i):
         time.sleep(1)
         get_account_balance(i + 1)
     if i > 3:
-        print('Se ha superado el máximo número de intentos. El programa se cerrará.')
+        send_telegram_message('Se ha superado el máximo número de intentos. El programa se cerrará.')
         exit()
 
     return balance
@@ -165,6 +165,7 @@ while True:
             strategy()
     except:
         write_file(exception_file, traceback.format_exc())
+        send_telegram_message('Algo esta fallando, revisa el archivo de excepciones.')
         time.sleep(2)
         continue
 
