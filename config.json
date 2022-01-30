@@ -1,0 +1,23 @@
+{
+    "coin": "BUSD",
+    "symbols": [
+        {
+            "BTC": 3
+        },
+        {
+            "ETH": 3
+        },
+        {
+            "BNB": 2
+        },
+        {
+            "ADA": 1
+        },
+        {
+            "XRP": 1
+        }
+    ],
+    "leverage": 2,
+    "data_file": "data.csv",
+    "exception_file": "exception.txt"
+}
