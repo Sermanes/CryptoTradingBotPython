@@ -1,4 +1,4 @@
-from time import time
+import time
 import utils.registry as registry
 import pandas as pd
 import config.config as configuration

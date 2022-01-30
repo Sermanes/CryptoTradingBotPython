@@ -1,4 +1,4 @@
-from time import time
+import time
 import utils.analysis as analysis
 import utils.binance as binance
 import utils.registry as registry
