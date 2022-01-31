@@ -23,6 +23,8 @@ def stocastic_movement_sell(data, stoch_k, stoch_d, open_price, current_price):
         registry.send_telegram_message('Se vende por movimiento brusco')
         return True
     if stoch_k >= 75 or stoch_d >= 75:
+        if open_price < current_price:
+            return False
         registry.send_telegram_message('El estocástico alcanzo 75 puntos')
         return True
     
@@ -40,13 +42,13 @@ def stop_loss_take_profit(client, pair, quantity, open_price):
             pair, rsi, macd, stoch_k, stoch_d))
         if stocastic_movement_sell(minute_data, stoch_k, stoch_d, open_price, current_price):
             binance.close_order(client, pair, quantity)
-            registry.add_order_to_history(False, current_price, quantity)
+            registry.add_order_to_history(False, current_price, quantity, pair)
             order_is_open = False
             continue
         # Take profit en 1,005 y Stoploss en 0.995
         if current_price <= (open_price * 0.995) or current_price >= (open_price * 1.005):
             binance.close_order(client, pair, quantity)
-            registry.add_order_to_history(False, current_price, quantity)
+            registry.add_order_to_history(False, current_price, quantity, pair)
             order_is_open = False
             continue
 
