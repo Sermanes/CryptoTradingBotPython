@@ -7,7 +7,7 @@ import config.config as configuration
 
 
 
-def stocastic_movement_sell(data, stoch_k, stoch_d):
+def stocastic_movement_sell(data, stoch_k, stoch_d, open_price, current_price):
     k = data['%K'].iloc[-2]
     d = data['%D'].iloc[-2]
     kk = data['%K'].iloc[-3]
@@ -16,6 +16,10 @@ def stocastic_movement_sell(data, stoch_k, stoch_d):
     d_mean = (d + dd)/2
 
     if (stoch_k - k_mean >= 50) or (stoch_d - d_mean >= 50):
+        # No siempre que hay un movimiento alcista brusco otorga ganancias, en ese caso
+        # dejamos que actue mejor el SL que vender en perdidas
+        if open_price < current_price:
+            return False
         registry.send_telegram_message('Se vende por movimiento brusco')
         return True
     if stoch_k >= 75 or stoch_d >= 75:
@@ -34,7 +38,7 @@ def stop_loss_take_profit(client, pair, quantity, open_price):
             minute_data)
         print('El activo comprado {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}'.format(
             pair, rsi, macd, stoch_k, stoch_d))
-        if stocastic_movement_sell(minute_data, stoch_k, stoch_d):
+        if stocastic_movement_sell(minute_data, stoch_k, stoch_d, open_price, current_price):
             binance.close_order(client, quantity)
             registry.add_order_to_history(False, current_price, quantity)
             order_is_open = False
