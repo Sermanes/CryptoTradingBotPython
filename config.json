@@ -19,5 +19,6 @@
     ],
     "leverage": 2,
     "data_file": "data.csv",
-    "exception_file": "exception.txt"
+    "exception_file": "exception.txt",
+    "probability": 80
 }

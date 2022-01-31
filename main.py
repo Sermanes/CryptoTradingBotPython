@@ -14,7 +14,8 @@ while True:
         decimals = configuration.get_decimals()
         for index, symbol in enumerate(configuration.get_symbols()):
             pair = symbol + configuration.get_coin()
-            client.futures_change_leverage(leverage=configuration.get_leverage(), symbol=pair)
+            client.futures_change_leverage(
+                leverage=configuration.get_leverage(), symbol=pair)
             strategy.run(client, pair, decimals[index])
     except:
         registry.log_exception(traceback.format_exc())
