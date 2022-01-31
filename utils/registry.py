@@ -32,7 +32,7 @@ def add_order_to_history(new_order, price, quantity, pair):
     else:
         text = 'Close {0}: {1}/{2}'.format(pair, price, quantity)
         csv = '{0},{1},{2}'.format(pair, price, quantity)
-        write_file(DATA_FILE, csv, quantity)
+        write_file(DATA_FILE, csv)
         send_telegram_message(text)
 
 
