@@ -5,6 +5,26 @@ import utils.binance as binance
 import utils.registry as registry
 import config.config as configuration
 
+
+
+def stocastic_movement_sell(data, stoch_k, stoch_d):
+    k = data['%K'].iloc[-2]
+    d = data['%D'].iloc[-2]
+    kk = data['%K'].iloc[-3]
+    dd = data['%D'].iloc[-3]
+    k_mean = (k + kk)/2
+    d_mean = (d + dd)/2
+
+    if (stoch_k - k_mean >= 50) or (stoch_d - d_mean >= 50):
+        registry.send_telegram_message('Se vende por movimiento brusco')
+        return True
+    if stoch_k >= 75 or stoch_d >= 75:
+        registry.send_telegram_message('El estocástico alcanzo 75 puntos')
+        return True
+    
+    return False
+
+
 # stop_loss_take_profit normas para ejecutar la opcion de venta
 def stop_loss_take_profit(client, pair, quantity, open_price):
     order_is_open = True
@@ -12,13 +32,14 @@ def stop_loss_take_profit(client, pair, quantity, open_price):
         minute_data = binance.get_minute_data(client, pair, '1m', '100')
         rsi, macd, stoch_k, stoch_d, current_price = analysis.return_strategy_data(
             minute_data)
-        print('El activo {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}'.format(
+        print('El activo comprado {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}'.format(
             pair, rsi, macd, stoch_k, stoch_d))
-        if stoch_k >= 75 or stoch_d >= 75:
+        if stocastic_movement_sell(minute_data, stoch_k, stoch_d):
             binance.close_order(client, quantity)
             registry.add_order_to_history(False, current_price, quantity)
             order_is_open = False
             continue
+        # Take profit en 1,005 y Stoploss en 0.995
         if current_price <= (open_price * 0.995) or current_price >= (open_price * 1.005):
             binance.close_order(client, quantity)
             registry.add_order_to_history(False, current_price, quantity)
@@ -56,6 +77,8 @@ def macd_probability(df, macd):
     return 0
 
 
+# calculate_probability suma las probabilidades de los indicadores y devuelve la probabilidad de que el moviemiento
+# sea correcto
 def calculate_probability(client, pair):
     data = binance.get_minute_data(client, pair, '1m', '100')
     rsi, macd, stoch_k, stoch_d, price = analysis.return_strategy_data(data)
