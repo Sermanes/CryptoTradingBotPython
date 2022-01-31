@@ -2,7 +2,8 @@ import ta
 
 # Conseguir RSI, MACD y Estocastico del activo
 def apply_technicals(df):
-    df['%K'] = ta.momentum.stoch(df.High, df.Low, df.Close, window=14, smooth_window=3)
+    df['%K'] = ta.momentum.stoch(
+        df.High, df.Low, df.Close, window=14, smooth_window=3)
     df['%D'] = df['%K'].rolling(3).mean()
     df['rsi'] = ta.momentum.rsi(df.Close, window=14)
     df['macd'] = ta.trend.macd_diff(df.Close)

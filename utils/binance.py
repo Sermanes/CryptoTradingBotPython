@@ -16,7 +16,8 @@ def get_account_balance(client, i):
         time.sleep(1)
         get_account_balance(client, i+1)
     if i == 3:
-        registry.send_telegram_message('Se ha superado el máximo número de intentos. El programa se cerrará.')
+        registry.send_telegram_message(
+            'Se ha superado el máximo número de intentos. El programa se cerrará.')
         exit()
 
     return balance
@@ -24,7 +25,8 @@ def get_account_balance(client, i):
 
 # get_minute_data nos ayuda a conseguir la informacion del par determinado anteriormente
 def get_minute_data(client, pair, interval, lookback):
-    frame = pd.DataFrame(client.futures_historical_klines(pair, interval, lookback + ' min ago UTC'))
+    frame = pd.DataFrame(client.futures_historical_klines(
+        pair, interval, lookback + ' min ago UTC'))
 
     frame = frame.iloc[:, :6]
     frame.columns = ['Time', 'Open', 'High', 'Low', 'Close', 'Volume']
@@ -39,9 +41,11 @@ def get_minute_data(client, pair, interval, lookback):
 def open_order(client, pair, decimals, df):
     balance = get_account_balance(client, 0)
     last_price = df.Close[-1]
-    quantity = round(((balance / last_price) * configuration.get_leverage()) * 0.75, decimals)
+    quantity = round(
+        ((balance / last_price) * configuration.get_leverage()) * 0.75, decimals)
     print('El bot comprara una cantidad de: ', quantity, ' ', pair)
-    order = client.futures_create_order(symbol=pair, side='BUY', type="MARKET", quantity=quantity)
+    order = client.futures_create_order(
+        symbol=pair, side='BUY', type="MARKET", quantity=quantity)
     registry.add_order_to_history(True, last_price, quantity, pair)
 
     return order['orderId'], quantity
@@ -49,4 +53,5 @@ def open_order(client, pair, decimals, df):
 
 # close_order nos permite cerrar nuestra orden
 def close_order(client, pair, quantity):
-    client.futures_create_order(symbol=pair, side='SELL', type="MARKET", quantity=quantity)
+    client.futures_create_order(
+        symbol=pair, side='SELL', type="MARKET", quantity=quantity)
