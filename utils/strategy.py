@@ -39,13 +39,13 @@ def stop_loss_take_profit(client, pair, quantity, open_price):
         print('El activo comprado {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}'.format(
             pair, rsi, macd, stoch_k, stoch_d))
         if stocastic_movement_sell(minute_data, stoch_k, stoch_d, open_price, current_price):
-            binance.close_order(client, quantity)
+            binance.close_order(client, pair, quantity)
             registry.add_order_to_history(False, current_price, quantity)
             order_is_open = False
             continue
         # Take profit en 1,005 y Stoploss en 0.995
         if current_price <= (open_price * 0.995) or current_price >= (open_price * 1.005):
-            binance.close_order(client, quantity)
+            binance.close_order(client, pair, quantity)
             registry.add_order_to_history(False, current_price, quantity)
             order_is_open = False
             continue
@@ -59,16 +59,16 @@ def density_function(x, b):
 
 
 # rsi_probability devuelve la probabilidad de que rebote el valor, cuanto más cercano a 0
-# mas probabilidad de que rebote. Ademas dentro de los diferentes indicadores tiene una fuerza de un 55%
+# mas probabilidad de que rebote. Ademas dentro de los diferentes indicadores tiene una fuerza de un 60%
 def rsi_probability(rsi):
-    return  (100 - (density_function(rsi, 100)*100))*0.55
+    return  (100 - (density_function(rsi, 100)*100))*0.6
 
 
 # stoch_probability devuelve la probabilidad de que rebote el valor, cuanto más cercano a 0
-# mas probabilidad de que rebote. Ademas dentro de los diferentes indicadores tiene una fuerza de un 30%
+# mas probabilidad de que rebote. Ademas dentro de los diferentes indicadores tiene una fuerza de un 25%
 def stoch_probability(stoch_k, stoch_d):
     m = (stoch_k+stoch_d)/2
-    return  (100 - (density_function(m, 100)*100))*0.35
+    return  (100 - (density_function(m, 100)*100))*0.25
 
 
 # macd_probability devuelve la probabilidad de que rebote el valor, cuanto más cercano al menor macd registrado
