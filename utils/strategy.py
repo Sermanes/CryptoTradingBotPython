@@ -97,6 +97,7 @@ def calculate_probability(client, pair):
 def run(client, pair, decimals):
     probability, data = calculate_probability(client, pair)
     if  probability >= configuration.get_probability():
+        registry.send_telegram_message('La probabilidad ganadora en {0} es de: {1}'.format(pair, probability))
         order_id, quantity = binance.open_order(client, pair, decimals, data)
         order = client.futures_get_order(orderId=order_id, symbol=pair)
         open_price = float(order['avgPrice'])
