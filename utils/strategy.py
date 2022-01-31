@@ -6,8 +6,6 @@ import utils.registry as registry
 import config.config as configuration
 
 # stop_loss_take_profit normas para ejecutar la opcion de venta
-
-
 def stop_loss_take_profit(client, pair, quantity, open_price):
     order_is_open = True
     while order_is_open:
@@ -16,7 +14,7 @@ def stop_loss_take_profit(client, pair, quantity, open_price):
             minute_data)
         print('El activo {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}'.format(
             pair, rsi, macd, stoch_k, stoch_d))
-        if stoch_k >= 80 or stoch_d >= 80:
+        if stoch_k >= 75 or stoch_d >= 75:
             binance.close_order(client, quantity)
             registry.add_order_to_history(False, current_price, quantity)
             order_is_open = False
@@ -29,33 +27,49 @@ def stop_loss_take_profit(client, pair, quantity, open_price):
 
         time.sleep(1)
 
-def density_function(alfa, x):
+# exponencial probability 1-e^(-x/B)
+# @see https://en.wikipedia.org/wiki/Exponential_distribution
+def density_function(x, b):
+    return (1-math.e**(-x/b))
 
 
+# rsi_probability devuelve la probabilidad de que rebote el valor, cuanto más cercano a 0
+# mas probabilidad de que rebote. Ademas dentro de los diferentes indicadores tiene una fuerza de un 55%
 def rsi_probability(rsi):
-    # exponencial probability 1-e^(-rsi/100)
-    probability = 100 - ((1-math.e**(-rsi/100))*100)
-    return probability
+    return  (100 - (density_function(rsi, 100)*100))*0.55
 
 
+# stoch_probability devuelve la probabilidad de que rebote el valor, cuanto más cercano a 0
+# mas probabilidad de que rebote. Ademas dentro de los diferentes indicadores tiene una fuerza de un 30%
 def stoch_probability(stoch_k, stoch_d):
     m = (stoch_k+stoch_d)/2
-    probability = 100 - ((1-math.e**(-rsi/100))*100)
+    return  (100 - (density_function(m, 100)*100))*0.35
 
 
-def probability(client, pair):
+# macd_probability devuelve la probabilidad de que rebote el valor, cuanto más cercano al menor macd registrado
+# en los últimos movimientos aumentando la probabilidad de que rebote. Dentro de los diferentes indicadores tiene una fuerza de un 15%
+def macd_probability(df, macd):
+    if macd < 0:
+        minimum = df['macd'].min()
+        return (100 - ((macd/minimum)*100))*0.15
+
+    return 0
+
+
+def calculate_probability(client, pair):
     data = binance.get_minute_data(client, pair, '1m', '100')
     rsi, macd, stoch_k, stoch_d, price = analysis.return_strategy_data(data)
     print('El activo {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}'.format(
         pair, rsi, macd, stoch_k, stoch_d))
     
-    
+    return rsi_probability(rsi) + stoch_probability(stoch_k, stoch_d) + macd_probability(data, macd), data
 
 
 
 # strategy es el core de la aplicación, contiene la logica de la estrategia
 def run(client, pair, decimals):
-    if probability(client, pair) >= configuration.get_probability():
+    probability, data = calculate_probability(client, pair)
+    if  probability >= configuration.get_probability():
         order_id, quantity = binance.open_order(client, pair, decimals, data)
         order = client.futures_get_order(orderId=order_id, symbol=pair)
         open_price = float(order['avgPrice'])
