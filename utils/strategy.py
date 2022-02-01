@@ -19,14 +19,13 @@ def stocastic_movement_sell(data, stoch_k, stoch_d, open_price, current_price):
         # No siempre que hay un movimiento alcista brusco otorga ganancias, en ese caso
         # dejamos que actue mejor el SL que vender en perdidas
         if open_price < current_price:
-            return False
-        registry.send_telegram_message('Se vende por movimiento brusco')
-        return True
+            registry.send_telegram_message('Se vende por movimiento brusco')
+            return True
+        
     if stoch_k >= 75 or stoch_d >= 75:
         if open_price < current_price:
-            return False
-        registry.send_telegram_message('El estocástico alcanzo 75 puntos')
-        return True
+            registry.send_telegram_message('El estocástico alcanzo 75 puntos')
+            return True
     
     return False
 
