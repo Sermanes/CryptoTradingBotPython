@@ -38,7 +38,7 @@ def stop_loss_take_profit(client, pair, quantity, open_price):
         rsi, macd, stoch_k, stoch_d, current_price = analysis.return_strategy_data(
             minute_data)
         print('El activo comprado {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}'.format(
-            pair, rsi, macd, stoch_k, stoch_d))
+            pair, round(rsi, 4), round(macd, 4), round(stoch_k, 4), round(stoch_d, 4)))
         if stocastic_movement_sell(minute_data, stoch_k, stoch_d, open_price, current_price):
             binance.close_order(client, pair, quantity)
             registry.add_order_to_history(False, current_price, quantity, pair)
