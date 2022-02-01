@@ -87,10 +87,11 @@ def macd_probability(df, macd):
 def calculate_probability(client, pair):
     data = binance.get_minute_data(client, pair, '1m', '100')
     rsi, macd, stoch_k, stoch_d, price = analysis.return_strategy_data(data)
-    print('El activo {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}'.format(
-        pair, rsi, macd, stoch_k, stoch_d))
+    probability = (rsi_probability(rsi) + stoch_probability(stoch_k, stoch_d) + macd_probability(data, macd))/3
+    print('El activo {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}, probabilidad {5}'.format(
+        pair, rsi, macd, stoch_k, stoch_d, probability))
     
-    return (rsi_probability(rsi) + stoch_probability(stoch_k, stoch_d) + macd_probability(data, macd))/3, data
+    return probability, data
 
 
 
