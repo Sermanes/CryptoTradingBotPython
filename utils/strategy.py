@@ -60,24 +60,24 @@ def density_function(x, b):
 
 
 # rsi_probability devuelve la probabilidad de que rebote el valor, cuanto más cercano a 0
-# mas probabilidad de que rebote. Ademas dentro de los diferentes indicadores tiene una fuerza de un 45%
+# mas probabilidad de que rebote.
 def rsi_probability(rsi):
-    return  (100 - (density_function(rsi, 100)*100))*0.45
+    return  100 - (density_function(rsi, 100)*100)
 
 
 # stoch_probability devuelve la probabilidad de que rebote el valor, cuanto más cercano a 0
-# mas probabilidad de que rebote. Ademas dentro de los diferentes indicadores tiene una fuerza de un 30%
+# mas probabilidad de que rebote.
 def stoch_probability(stoch_k, stoch_d):
     m = (stoch_k+stoch_d)/2
-    return  (100 - (density_function(m, 100)*100))*0.3
+    return  100 - (density_function(m, 100)*100)
 
 
 # macd_probability devuelve la probabilidad de que rebote el valor, cuanto más cercano al menor macd registrado
-# en los últimos movimientos aumentando la probabilidad de que rebote. Dentro de los diferentes indicadores tiene una fuerza de un 25%
+# en los últimos movimientos aumentando la probabilidad de que rebote.
 def macd_probability(df, macd):
     if macd < 0:
         minimum = df['macd'].min()
-        return (100 - ((macd/minimum)*100))*0.25
+        return 100 - ((macd/minimum)*100)
 
     return 0
 
@@ -90,7 +90,7 @@ def calculate_probability(client, pair):
     print('El activo {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}'.format(
         pair, rsi, macd, stoch_k, stoch_d))
     
-    return rsi_probability(rsi) + stoch_probability(stoch_k, stoch_d) + macd_probability(data, macd), data
+    return (rsi_probability(rsi) + stoch_probability(stoch_k, stoch_d) + macd_probability(data, macd))/3, data
 
 
 
