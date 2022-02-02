@@ -15,7 +15,7 @@ def stocastic_movement_sell(data, stoch_k, stoch_d, open_price, current_price):
     k_mean = (k + kk)/2
     d_mean = (d + dd)/2
 
-    if (stoch_k - k_mean >= 50) or (stoch_d - d_mean >= 50):
+    if (stoch_k - k_mean >= 60) or (stoch_d - d_mean >= 60):
         # No siempre que hay un movimiento alcista brusco otorga ganancias, en ese caso
         # dejamos que actue mejor el SL que vender en perdidas
         if open_price < current_price:
@@ -39,11 +39,11 @@ def stop_loss_take_profit(client, pair, quantity, open_price):
             minute_data)
         print('El activo comprado {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}'.format(
             pair, round(rsi, 4), round(macd, 4), round(stoch_k, 4), round(stoch_d, 4)))
-        if stocastic_movement_sell(minute_data, stoch_k, stoch_d, open_price, current_price):
-            binance.close_order(client, pair, quantity)
-            registry.add_order_to_history(False, current_price, quantity, pair)
-            order_is_open = False
-            continue
+        #if stocastic_movement_sell(minute_data, stoch_k, stoch_d, open_price, current_price):
+        #    binance.close_order(client, pair, quantity)
+        #    registry.add_order_to_history(False, current_price, quantity, pair)
+        #    order_is_open = False
+        #    continue
         # Take profit en 1,005 y Stoploss en 0.995
         if current_price <= (open_price * 0.995) or current_price >= (open_price * 1.005):
             binance.close_order(client, pair, quantity)
