@@ -89,6 +89,8 @@ def strategy_by_rsi(client, pair):
     if rsi < 22 and stoch_d < 20 and stoch_k < 20 and macd < 0:
         return True, data
 
+    return False, data
+
 
 
 # calculate_probability suma las probabilidades de los indicadores y devuelve la probabilidad de que el moviemiento
