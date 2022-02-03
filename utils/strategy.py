@@ -39,13 +39,13 @@ def stop_loss_take_profit(client, pair, quantity, open_price):
             minute_data)
         print('El activo comprado {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}'.format(
             pair, round(rsi, 4), round(macd, 4), round(stoch_k, 4), round(stoch_d, 4)))
-        #if stocastic_movement_sell(minute_data, stoch_k, stoch_d, open_price, current_price):
-        #    binance.close_order(client, pair, quantity)
-        #    registry.add_order_to_history(False, current_price, quantity, pair)
-        #    order_is_open = False
-        #    continue
+        if stocastic_movement_sell(minute_data, stoch_k, stoch_d, open_price, current_price):
+            binance.close_order(client, pair, quantity)
+            registry.add_order_to_history(False, current_price, quantity, pair)
+            order_is_open = False
+            continue
         # Take profit en 1,005 y Stoploss en 0.995
-        if current_price <= (open_price * 0.995) or current_price >= (open_price * 1.005):
+        if current_price <= (open_price * 0.99) or current_price >= (open_price * 1.005):
             binance.close_order(client, pair, quantity)
             registry.add_order_to_history(False, current_price, quantity, pair)
             order_is_open = False
@@ -81,6 +81,15 @@ def macd_probability(df, macd):
 
     return 0
 
+def strategy_by_rsi(client, pair):
+    data = binance.get_minute_data(client, pair, '5m', '500')
+    rsi, macd, stoch_k, stoch_d, price = analysis.return_strategy_data(data)
+    print('El activo {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}, probabilidad: {5}%'.format(
+        pair, round(rsi, 4), round(macd, 4), round(stoch_k, 4), round(stoch_d, 4)))
+    if rsi < 22 and stoch_d < 20 and stoch_k < 20 and macd < 0:
+        return True, data
+
+
 
 # calculate_probability suma las probabilidades de los indicadores y devuelve la probabilidad de que el moviemiento
 # sea correcto
@@ -97,8 +106,8 @@ def calculate_probability(client, pair):
 
 # strategy es el core de la aplicación, contiene la logica de la estrategia
 def run(client, pair, decimals):
-    probability, data = calculate_probability(client, pair)
-    if  probability >= configuration.get_probability():
+    buy, data = strategy_by_rsi(client, pair)
+    if  buy:
         order_id, quantity = binance.open_order(client, pair, decimals, data)
         order = client.futures_get_order(orderId=order_id, symbol=pair)
         open_price = float(order['avgPrice'])
