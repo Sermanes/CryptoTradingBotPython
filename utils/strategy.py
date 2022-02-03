@@ -84,7 +84,7 @@ def macd_probability(df, macd):
 def strategy_by_rsi(client, pair):
     data = binance.get_minute_data(client, pair, '5m', '500')
     rsi, macd, stoch_k, stoch_d, price = analysis.return_strategy_data(data)
-    print('El activo {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}, probabilidad: {5}%'.format(
+    print('El activo {0} se encuentra en los siguientes niveles: RSI: {1}, MACD: {2}, Estocástico: {3}/{4}'.format(
         pair, round(rsi, 4), round(macd, 4), round(stoch_k, 4), round(stoch_d, 4)))
     if rsi < 22 and stoch_d < 20 and stoch_k < 20 and macd < 0:
         return True, data
