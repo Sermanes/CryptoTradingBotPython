@@ -17,7 +17,7 @@
             "XRP": 1
         }
     ],
-    "leverage": 5,
+    "leverage": 8,
     "data_file": "data.csv",
     "exception_file": "exception.txt",
     "probability": 80
