@@ -12,8 +12,10 @@ def stocastic_movement_sell(data, stoch_k, stoch_d, open_price, current_price):
     d = data['%D'].iloc[-2]
     kk = data['%K'].iloc[-3]
     dd = data['%D'].iloc[-3]
-    k_mean = (k + kk)/2
-    d_mean = (d + dd)/2
+    kkk = data['%K'].iloc[-4]
+    ddd = data['%D'].iloc[-4]
+    k_mean = (k + kk + kkk)/3
+    d_mean = (d + dd + ddd)/3
 
     if (stoch_k - k_mean >= 50) or (stoch_d - d_mean >= 50):
         # No siempre que hay un movimiento alcista brusco otorga ganancias, en ese caso
@@ -24,7 +26,7 @@ def stocastic_movement_sell(data, stoch_k, stoch_d, open_price, current_price):
         
     if stoch_k >= 80 or stoch_d >= 80:
         if open_price < current_price:
-            registry.send_telegram_message('El estocástico alcanzo 75 puntos')
+            registry.send_telegram_message('El estocástico alcanzo 80 puntos')
             return True
     
     return False
@@ -48,6 +50,7 @@ def stop_loss_take_profit(client, pair, quantity, open_price):
         if current_price <= (open_price * 0.99) or current_price >= (open_price * 1.005):
             binance.close_order(client, pair, quantity)
             registry.add_order_to_history(False, current_price, quantity, pair)
+            registry.send_telegram_message("Ha saltado el SL o TP")
             order_is_open = False
             continue
 
@@ -88,6 +91,11 @@ def strategy_by_rsi(client, pair):
         pair, round(rsi, 4), round(macd, 4), round(stoch_k, 4), round(stoch_d, 4)))
     if rsi < 22 and stoch_d < 20 and stoch_k < 20 and macd < 0:
         return True, data
+    if rsi < 30 and stoch_d < 20 and stoch_k < 20 and macd < 0:
+        _data = binance.get_minute_data(client, pair, '1m', '100')
+        rsi, macd, stoch_k, stoch_d, _ = analysis.return_strategy_data(_data)
+        if rsi < 30 and stoch_d < 20 and stoch_k < 20 and macd < 0:
+            return True, data
 
     return False, data
 
